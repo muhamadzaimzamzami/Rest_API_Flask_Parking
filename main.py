@@ -224,6 +224,7 @@ def getParkir():
         return make_response(jsonify({
             'error': str(e)
         }), 400)  
+
 @app.route('/addVehicle', methods=['POST'])
 def addVehicle():
     try:
@@ -256,6 +257,7 @@ def addVehicle():
         return make_response(jsonify({
             'error': str(e)
         }), 400)
+
 @app.route('/topUp', methods=['PUT'])
 def toUp():
     try:
