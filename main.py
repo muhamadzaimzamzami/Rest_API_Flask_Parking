@@ -38,7 +38,7 @@ def register():
         }), 400)
 
 @app.route('/getUser')
-def users():
+def getUser():
     try:
         idUsers = request.args.get('id')
         conn = mysql.connect()
@@ -158,9 +158,9 @@ def getUserVehicle():
                     'id_user': str(resp['id_users']),
                     'merek': resp['merek'],
                     'model': resp['model'],
+                    'warna': resp['warna'],
                     'no_polisi': resp['no_polisi'],
-                    'jenis': resp['jenis'],
-                    'warna': resp['warna']
+                    'jenis': resp['jenis']   
                 }
             })
             return response
@@ -258,16 +258,16 @@ def addVehicle():
             'error': str(e)
         }), 400)
 
-@app.route('/topUp', methods=['PUT'])
+@app.route('/topUp', methods=['POST'])
 def toUp():
     try:
         data = request.form
-        idUser = data['id']
+        idUsers = data['id']
         saldo = data['saldo']
         conn = mysql.connect()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
-        query = "UPDATE users SET saldo = %s WHERE id = %s"
-        bindData = (saldo, idUser)
+        query = "UPDATE users SET saldo = saldo+%s WHERE id = %s"
+        bindData = (saldo, idUsers)
         exe = cursor.execute(query, bindData)
         conn.commit()
         if exe:
@@ -287,5 +287,70 @@ def toUp():
             'error': str(e)
         }), 400)
 
+@app.route('/editUser', methods=['POST'])
+def editUsers():
+    try:
+        data = request.form
+        idUser = data["id"]
+        name = data["nama"]
+        telp = data["no_telp"]
+        email = data["email"]
+        passw = generate_password_hash(data["password"])
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        query =  "UPDATE users SET nama = %s, no_telp = %s, email = %s, password = %s WHERE id = %s"
+        bindData = (name, telp, email,passw ,idUser)
+        exe = cursor.execute(query, bindData)
+        conn.commit()
+        if exe:
+            response = jsonify({
+                'error': False,
+                'message': 'Profil Telah diperbarui',
+            })
+            return response
+        else:
+            response = jsonify({
+                'error': True,
+                'message': 'Terjadi Kesalahan',
+            })
+            return response
+    except Exception as e:
+        return make_response(jsonify({
+            'error': str(e)
+        }), 400)
+
+@app.route('/payParking', methods=['POST'])
+def payParking():
+    try:
+        data = request.form
+        idPark = data["id"]
+        idUser = data["id_user"]
+        cost = data["cost"]
+        dateNow = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        status = "P"
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        query =  "UPDATE users, parking SET users.saldo = users.saldo - %s, parking.waktuBayar = %s ,parking.biaya = %s, parking.status = %s WHERE users.id = %s AND parking.id = %s"
+        bindData = (cost, dateNow, cost, status ,idUser ,idPark)
+        exe = cursor.execute(query, bindData)
+        conn.commit()
+        if exe:
+            response = jsonify({
+                'error': False,
+                'message': 'Pembayaran Berhasil',
+            })
+            return response
+        else:
+            response = jsonify({
+                'error': True,
+                'message': 'Terjadi Kesalahan',
+            })
+            return response
+    except Exception as e:
+        return make_response(jsonify({
+            'error': str(e)
+        }), 400)
+
+
 if __name__ == "__main__":
-    app.run(debug=True, port=5000, host='192.168.1.6')
+    app.run(debug=True, port=5000, host='192.168.1.5')
