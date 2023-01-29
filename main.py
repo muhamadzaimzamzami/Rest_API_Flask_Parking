@@ -52,7 +52,7 @@ def getUser():
                     'nama' : dtUsers['nama'],
                     'no_telp' : dtUsers['no_telp'],
                     'email' : dtUsers['email'],
-                    'password' : dtUsers['password'],
+                    'password' : "",
                 }
             })
             return response
@@ -146,22 +146,23 @@ def getUserVehicle():
         query = "SELECT * FROM vehicles WHERE id_users = %s ORDER BY jenis ASC"
         bindData = (idUsers)
         cursor.execute(query, bindData)
-        resp = cursor.fetchone()
+        resp = cursor.fetchall()
         # if resp and check_password_hash(resp[2], password):
         if resp:
             response = jsonify({
                 'error': False,
                 'message': 'Success',
                 # `id`, `id_users`, `merek`, `model`, `warna`, `no_polisi`, `jenis`, `created_at`, `updated_at`
-                'result': {
-                    'id': str(resp['id']),
-                    'id_user': str(resp['id_users']),
-                    'merek': resp['merek'],
-                    'model': resp['model'],
-                    'warna': resp['warna'],
-                    'no_polisi': resp['no_polisi'],
-                    'jenis': resp['jenis']   
-                }
+                # 'result': {
+                #     'id': str(resp['id']),
+                #     'id_user': str(resp['id_users']),
+                #     'merek': resp['merek'],
+                #     'model': resp['model'],
+                #     'warna': resp['warna'],
+                #     'no_polisi': resp['no_polisi'],
+                #     'jenis': resp['jenis']   
+                # }
+                'result' : resp
             })
             return response
         else:
@@ -353,4 +354,4 @@ def payParking():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000, host='192.168.1.5')
+    app.run(debug=True, port=5000, host='192.168.1.2')
